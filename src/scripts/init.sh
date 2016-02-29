@@ -15,6 +15,7 @@ for file in "package.json\
   bower.json\
   src/client/index.html\
   src/client/js/app.js\
+  src/client/js/route.js\
   src/client/js/controllers/hello-ctrl.js\
   test/unit/client/hello-ctrl-spec.js"
 do 
