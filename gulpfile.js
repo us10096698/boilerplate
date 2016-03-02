@@ -1,13 +1,14 @@
 'use strict';
 
-var gulp        = require('gulp-help')(require('gulp')),
-    $           = require('gulp-load-plugins')(),
-    server      = require( __dirname + '/src/server/app'),
-    runSequence = require('run-sequence'),
-    del         = require('del'),
-    wiredep     = require('wiredep').stream,
-    Karma       = require('karma').Server,
-    browserSync = require('browser-sync').create();
+var gulp           = require('gulp-help')(require('gulp')),
+    $              = require('gulp-load-plugins')(),
+    server         = require( __dirname + '/src/server/app'),
+    runSequence    = require('run-sequence'),
+    del            = require('del'),
+    wiredep        = require('wiredep').stream,
+    Karma          = require('karma').Server,
+    browserSync    = require('browser-sync').create(),
+    mainBowerFiles = require('main-bower-files');
 
 // ************** Tasks **********************
 
@@ -15,6 +16,7 @@ gulp.task('start', 'Start server', start);
 gulp.task('stop', 'Stop server', stop);
 gulp.task('bower', 'Install Bower dependencies', bower);
 gulp.task('clean', 'Remove published client-side files',  clean);
+gulp.task('copyBowerDep', 'Publish Bower main files', copyBowerDep);
 gulp.task('copyAssets', 'Copy client-side files', copyAssets);
 gulp.task('compileCss', 'Compile SASS files', compileCss);
 gulp.task('compileJs', 'Compile Javascript files', compileJs);
@@ -30,8 +32,7 @@ gulp.task('lint', 'Execute ESLint analysis', lint);
 // *************** Task Chain ********************
 
 gulp.task('build', 'Publish client-side files', function(done) {
-  runSequence('clean', ['copyAssets', 'compileJs'],
-      ['bower', 'compileCss'], 'compileIndex', done);
+  runSequence('clean', ['copyAssets', 'compileJs', 'copyBowerDep', 'compileCss'], 'compileIndex', done);
 });
 
 gulp.task('alltest', 'Execute all tests', function(done) {
@@ -45,7 +46,6 @@ gulp.task('e2e', 'Execute e2e tests (Protractor)', function(done) {
 gulp.task('unit', 'Execute overall unit tests', function(done) {
   runSequence('unit:server', 'unit:client', done);
 });
-
 
 // ***************** Implementaions *********************
 
@@ -63,6 +63,11 @@ function clean(done) {
 
 function bower() {
   return $.bower();
+}
+
+function copyBowerDep() {
+  return gulp.src(mainBowerFiles(), {base: __dirname + '/bower_components'})
+    .pipe(gulp.dest( __dirname + '/public/lib' ));
 }
 
 function copyAssets() {
@@ -94,8 +99,9 @@ function compileCss() {
 
 function compileIndex() {
   return gulp.src( __dirname + '/src/client/index.html')
-    .pipe(wiredep({ignorePath: '../../public'}))
     .pipe($.inject(gulp.src([
+      __dirname + '/public/lib/**/*.js',
+      __dirname + '/public/lib/**/*.css',
       __dirname + '/public/js/**/*.js',
       __dirname + '/public/css/**/*.css'
     ]), { ignorePath: '../../public', relative: true }))
@@ -147,7 +153,7 @@ function karmaBuild() {
           block: /(([ \t]*)\/\/\s*bower:*(\S*))(\n|\r|.)*?(\/\/\s*endbower)/gi,
           detect: {
             js: /['\']([^'\']+\.js)['\'],?/gi,
-            css: /['\']([^'\']+\.js)['\'],?/gi
+            css: /['\']([^'\']+\.css)['\'],?/gi
           },
           replace: {
             js: '"{{filePath}}",',

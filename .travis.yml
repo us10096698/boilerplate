@@ -4,6 +4,8 @@ node_js:
   - 4.2
 before_script:
   - npm install -g gulp bower
-script: gulp build && gulp alltest
+script:
+  - bower i
+  - gulp build && gulp alltest
 notifications:
   email: false
