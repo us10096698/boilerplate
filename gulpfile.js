@@ -28,6 +28,7 @@ gulp.task('unit:client', 'Execute client-side unit tests (Karma)', ['karma-build
 gulp.task('karma-build', 'Update Karma configuration', karmaBuild);
 gulp.task('unit:server', 'Execute server-side unit tests (Jasmine)', runJasmine);
 gulp.task('lint', 'Execute ESLint analysis', lint);
+gulp.task('default', 'Run default task', ['browser-sync']);
 
 // *************** Task Chain ********************
 
@@ -114,6 +115,13 @@ function syncBrowser() {
     port: 4000,
     open: false
   });
+
+  $.nodemon({
+    script: __dirname + '/src/scripts/start.js',
+    ext: 'js',
+    watch: ['/src/server/'],
+    env: { 'NODE_ENV': 'development' }
+    });
 
   gulp.watch( __dirname + '/src/client/sass/**/*.scss', ['compileCss']);
   gulp.watch([
