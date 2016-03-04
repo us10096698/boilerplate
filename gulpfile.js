@@ -126,8 +126,8 @@ function syncBrowser() {
   gulp.watch( __dirname + '/src/client/sass/**/*.scss', ['compileCss']);
   gulp.watch([
     __dirname + '/src/client/**',
-    '!' + __dirname + '/src/client/js',
-    '!' + __dirname + '/src/client/sass',
+    '!' + __dirname + '/src/client/js{,/**}',
+    '!' + __dirname + '/src/client/sass{,/**}',
     '!' + __dirname + '/src/client/index.html'
   ], ['copyAssets']);
   gulp.watch( __dirname + '/src/client/index.html', ['compileIndex']);
