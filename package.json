@@ -1,6 +1,7 @@
 {
   "name": "myapp",
   "description": "a minimum-viable express+angular app with tests",
+  "version": "1.0.0",
   "scripts": {
     "start": "node src/scripts/start.js",
     "test": "gulp alltest"

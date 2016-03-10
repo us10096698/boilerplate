@@ -1,6 +1,7 @@
 {
   "name": "myapp",
   "description": "a minimum-viable express+angular app with tests",
+  "version": "1.0.0",
   "main": "",
   "authors": [
     "us10096698"
