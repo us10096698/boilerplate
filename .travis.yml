@@ -7,5 +7,9 @@ before_script:
 script:
   - bower i
   - gulp build && gulp alltest
+env:
+  global:
+    - NODE_ENV=ci
+    - APP_URL=http://localhost:3000
 notifications:
   email: false

@@ -10,6 +10,8 @@ var gulp           = require('gulp-help')(require('gulp')),
     browserSync    = require('browser-sync').create(),
     mainBowerFiles = require('main-bower-files');
 
+var ENV = process.env.NODE_ENV || 'dev';
+
 // ************** Tasks **********************
 
 gulp.task('start', 'Start server', start);
@@ -37,10 +39,18 @@ gulp.task('build', 'Publish client-side files', function(done) {
 });
 
 gulp.task('alltest', 'Execute all tests', function(done) {
-  runSequence('unit', 'e2e', done);
+
+  if (ENV == 'dev') {
+    runSequence('unit', 'e2e', done);
+  } else {
+    runSequence('unit', 'e2e:ci', done);
+  }
+
 });
 
-gulp.task('e2e', 'Execute e2e tests (Protractor)', function(done) {
+gulp.task('e2e', 'Execute e2e tests for DEV (browser-sync) env', ['protractor']);
+
+gulp.task('e2e:ci', 'Execute e2e tests for CI (travis) env', function(done) {
   runSequence('start', 'protractor', 'stop', done);
 });
 
@@ -196,7 +206,7 @@ function lint() {
 }
 
 function isProduction() {
-  if (process.env.NODE_ENV == 'production') {
+  if (ENV == 'production') {
     return true;
   }
   return false;
