@@ -67,7 +67,10 @@ function bower() {
 }
 
 function copyBowerDep() {
-  return gulp.src(mainBowerFiles(), {base: __dirname + '/bower_components'})
+  return gulp.src(mainBowerFiles(),
+      {
+        base: __dirname + '/bower_components'
+      })
     .pipe(gulp.dest( __dirname + '/public/lib' ));
 }
 
@@ -100,12 +103,23 @@ function compileCss() {
 
 function compileIndex() {
   return gulp.src( __dirname + '/src/client/index.html')
+    .pipe($.inject(gulp.src(
+      mainBowerFiles(), {
+        read: false,
+        base: __dirname + '/bower_components'
+      }), {
+        starttag: '<!-- inject:bower:{{ext}} -->',
+        ignorePath: '../../bower_components',
+        addPrefix: '/lib',
+        relative: true
+      }))
     .pipe($.inject(gulp.src([
-      __dirname + '/public/lib/**/*.js',
-      __dirname + '/public/lib/**/*.css',
-      __dirname + '/public/js/**/*.js',
-      __dirname + '/public/css/**/*.css'
-    ]), { ignorePath: '../../public', relative: true }))
+        __dirname + '/public/js/**/*.js',
+        __dirname + '/public/css/**/*.css'
+      ], { read: false }), {
+        ignorePath: '../../public',
+        relative: true
+      }))
     .pipe(gulp.dest( __dirname + '/public/'));
 }
 
@@ -119,27 +133,27 @@ function syncBrowser() {
   $.nodemon({
     script: __dirname + '/src/scripts/start.js',
     ext: 'js',
-    watch: ['/src/server/'],
-    env: { 'NODE_ENV': 'development' }
+    watch: ['/src/server/']
     });
 
-  gulp.watch( __dirname + '/src/client/sass/**/*.scss', ['compileCss']);
   gulp.watch([
     __dirname + '/src/client/**',
     '!' + __dirname + '/src/client/js{,/**}',
     '!' + __dirname + '/src/client/sass{,/**}',
     '!' + __dirname + '/src/client/index.html'
   ], ['copyAssets']);
-  gulp.watch( __dirname + '/src/client/index.html', ['compileIndex']);
+  gulp.watch( __dirname + '/src/client/sass/**/*.scss', ['compileCss']);
   gulp.watch( __dirname + '/src/client/js/**/*.js', ['compileJs']);
+  gulp.watch( __dirname + '/src/client/index.html', ['compileIndex']);
   gulp.watch( __dirname + '/public/**/*.html').on('change', browserSync.reload);
 }
 
-function runProtractor() {
+function runProtractor(done) {
   return gulp.src([ __dirname + '/test/e2e/**/*-spec.js'])
     .pipe($.protractor.protractor({
       configFile: __dirname + '/test/e2e/protractor.conf.js'
-    }));
+    }))
+    .on('error', function() { done(); });
 }
 
 function runJasmine() {
